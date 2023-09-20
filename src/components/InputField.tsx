@@ -3,7 +3,7 @@ import React from "react";
 import { mainStyles } from "../styles/MainStyle";
 
 export interface InputFieldProps extends TextInputProps {
-	backgroundColor: string | "#fff";
+	backgroundColor?: string | "#fff";
 }
 
 const InputField = (props: InputFieldProps) => {

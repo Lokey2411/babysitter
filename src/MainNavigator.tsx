@@ -12,6 +12,7 @@ import Home from "./screens/Home";
 import Edit from "./screens/Info/Edit";
 import CalenderBooker from "./screens/LookUp/CalenderBooker";
 import OTP from "./screens/Auth/OTP";
+import { color } from "./styles/Color";
 
 export const MainNavigator = () => {
 	return (
@@ -19,6 +20,9 @@ export const MainNavigator = () => {
 			screenOptions={{
 				headerShown: false,
 				headerShadowVisible: false,
+				contentStyle: {
+					backgroundColor: color.white,
+				},
 			}}>
 			<Stack.Screen
 				name="Home"
@@ -28,7 +32,6 @@ export const MainNavigator = () => {
 				name="Chat"
 				component={Chat}
 			/>
-
 			<Stack.Screen
 				name="Details"
 				component={Details}

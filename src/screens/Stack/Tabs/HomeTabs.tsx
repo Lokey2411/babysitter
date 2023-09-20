@@ -79,7 +79,7 @@ const HomeTabs = () => {
 			/>
 			<Tab.Screen
 				name="Info"
-				component={Info}
+				component={userIsMommy ? MotherIntroduction : Introduction}
 				options={{
 					tabBarIcon: ({ color }) => {
 						return (

@@ -6,13 +6,17 @@ import BabyItem from "./BabyItem";
 
 const BabyList = (props: any) => {
 	return (
-		<SafeAreaView>
+		<SafeAreaView
+			style={{
+				backgroundColor: "#fff",
+				flex: 1,
+			}}>
 			<FlatList
 				data={baby}
 				renderItem={({ item }) => (
 					<BabyItem
 						{...item}
-						itemId={item.itemId}
+						// itemId={item.itemId}
 					/>
 				)}
 				keyExtractor={(item) => item.itemId.toString()}

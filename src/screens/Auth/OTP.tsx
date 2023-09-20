@@ -1,19 +1,9 @@
-import {
-	Alert,
-	Button,
-	StyleSheet,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	View,
-} from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import React, { useContext, useLayoutEffect, useRef, useState } from "react";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import BackButton from "../../components/BackButton";
 import { mainStyles } from "../../styles/MainStyle";
 import OTPInputView from "@twotalltotems/react-native-otp-input";
 import {
-	ApplicationVerifier,
 	PhoneAuthProvider,
 	RecaptchaVerifier,
 	signInWithCredential,
@@ -23,9 +13,7 @@ import { auth, firebaseConfig } from "../../firebase/config";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import { UserContext } from "../../context/init";
 import { color } from "../../styles/Color";
-import { Auth } from "firebase/auth";
-import { capitalize } from "../../const";
-import RegisterInfo from "./RegisterInfo";
+import { getUser, userInfoIsSetted } from "../../const";
 
 const OTP = ({ navigation, route }: any) => {
 	useLayoutEffect(() => {
@@ -35,10 +23,9 @@ const OTP = ({ navigation, route }: any) => {
 			headerShown: true,
 		});
 	});
-	// const { user, setUser } = useContext(UserContext);
+	const { setUserInfo } = useContext(UserContext);
 	const phoneNumber = `+84${route.params.phone}`;
 	const recaptchaVerifier = useRef<any>(null);
-	const [isRegisterInfo, setIsRegisterInfo] = useState(false);
 	const [verificationID, setVerificationID] = useState(
 		route.params.verificationID
 	);
@@ -50,7 +37,7 @@ const OTP = ({ navigation, route }: any) => {
 		try {
 			console.log("Sending code...");
 			const phoneProvider = new PhoneAuthProvider(auth); // initialize the phone provider.
-			const verificationId = await phoneProvider.verifyPhoneNumber(
+			const verificationId = phoneProvider.verifyPhoneNumber(
 				phoneNumber,
 				recaptchaVerifier.current
 			); // get the verification id
@@ -64,25 +51,42 @@ const OTP = ({ navigation, route }: any) => {
 		try {
 			// get the credential
 			const credential = PhoneAuthProvider.credential(verificationID, code);
-			console.log(credential);
-
 			// verify the credential
 			console.log(`verificationCode is ${code}`);
-			signInWithCredential(auth, credential)
-				.then(() => {
-					console.log("Logging in...");
-					navigation.navigate("RegisterInfo", {
-						phoneNumber,
-					});
-					// setIsRegisterInfo(true);
+			// signInWithCredential(auth, credential)
+			// 	.then(async () => {
+			// 		console.log("Logging in...");
+			// 		console.log(credential);
+			// 		if (userInfoIsSetted(phoneNumber)) {
+			// 			await setUserInfo(await getUser(phoneNumber));
+			// 		} else {
+			// 			navigation.navigate("RegisterInfo", {
+			// 				phoneNumber,
+			// 			});
+			// 		}
+			// 		// setIsRegisterInfo(true);
+			// 	})
+			// 	.catch(() => {
+			// 		// console.log();
+			// 		if (!userInfoIsSetted(phoneNumber))
+			// 			navigation.navigate("RegisterInfo", {
+			// 				phoneNumber,
+			// 			});
+			// 		setMessageShow(true);
+			// 	});
+			const appVerifier = new RecaptchaVerifier(auth, "recaptcha-container");
+			signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+				.then((confirmationResult) => {
+					confirmationResult
+						.confirm(code)
+						.then((result) => {
+							// Người dùng đã xác minh thành công
+						})
+						.catch((error) => {
+							// Xử lý lỗi
+						});
 				})
-				.catch(() => {
-					// console.log();
-					navigation.navigate("RegisterInfo", {
-						phoneNumber,
-					});
-					setMessageShow(true);
-				});
+				.catch((error) => console.log(error));
 		} catch (error: any) {
 			setMessageShow(true);
 		}
@@ -112,7 +116,6 @@ const OTP = ({ navigation, route }: any) => {
 				<FirebaseRecaptchaVerifierModal
 					ref={recaptchaVerifier}
 					firebaseConfig={firebaseConfig}
-					attemptInvisibleVerification={false}
 				/>
 				{/* <TextInput
 				placeholder="123456"

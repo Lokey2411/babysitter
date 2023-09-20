@@ -3,23 +3,25 @@ import {
 	Image,
 	StyleSheet,
 	Text,
+	TextInput,
 	Touchable,
 	TouchableOpacity,
 	View,
 } from "react-native";
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { color } from "../../styles/Color";
 import { mainStyles } from "../../styles/MainStyle";
 import { NavigationProps } from "./Introduction";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
-import { details, screenHeight, userLogedIn } from "../../const";
+import { details, getUserLoggedIn, screenHeight } from "../../const";
 import { AntDesign } from "@expo/vector-icons";
 import { UserContext } from "../../context/init";
 import { Edit2 } from "iconsax-react-native";
 import { signOut } from "firebase/auth";
-import { auth } from "../../firebase/config";
+import { auth, firestore } from "../../firebase/config";
+import { doc, getDoc } from "firebase/firestore";
 
 const navigationItem = [
 	{
@@ -64,10 +66,12 @@ const avtSize = 128;
 
 const MotherIntroduction = () => {
 	const navigation = useNavigation<any>();
-	const { user } = useContext(UserContext);
-	const item = userLogedIn;
+	const { userInfo } = useContext(UserContext);
+	const item = getUserLoggedIn(userInfo.id);
 	const name = item?.name;
-	const avt = item?.avt;
+	const avt = item?.avt
+		? item?.avt
+		: require("../../../assets/image/avt/mc.jpg");
 	const email = "penaldu@test.ru";
 	const userID = item?.id;
 	const onSignOut = () => {

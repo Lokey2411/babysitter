@@ -11,6 +11,13 @@ import { StatusBar } from "expo-status-bar";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./src/firebase/config";
 import AuthStack from "./src/screens/Stack/AuthStack";
+import {
+	asyncStorage,
+	getAsyncStorage,
+	getUser,
+	setAsyncStorage,
+	userInfoIsSetted,
+} from "./src/const";
 
 // StatusBar.setBarStyle("dark-content", true);
 
@@ -19,28 +26,33 @@ const RootNavigator = () => {
 	useLayoutEffect(() => {
 		setTimeout(() => setLoading(true), 1000);
 	});
-	const { user, setUser, userInfoIsSetted } =
+	const { user, setUser, userInfo, setUserInfo } =
 		useContext<UserContextTypes>(UserContext);
 	useEffect(() => {
-		const subcriber = onAuthStateChanged(auth, async (user) => {
-			console.log(userInfoIsSetted);
-			if (userInfoIsSetted) setUser(user ? user : null);
-
+		const subcriber = onAuthStateChanged(auth, async (authUser) => {
+			setUser(authUser ? authUser : null);
+			if (userInfoIsSetted(authUser?.phoneNumber as string))
+				await setUserInfo({
+					...(await getUser(authUser?.phoneNumber)),
+				});
 			setLoading(false);
 		});
 
 		return () => subcriber();
-	}, [user, userInfoIsSetted]);
+	}, [user]);
 	if (!loading) {
 		return <Loading />;
 	}
 	return (
 		<NavigationContainer>
 			{/* <Tab.Navigator
-				>
-				
+				>	
 			</Tab.Navigator> */}
-			{user && userInfoIsSetted ? <MainNavigator /> : <AuthStack />}
+			{user && userInfoIsSetted(userInfo.id) ? (
+				<MainNavigator />
+			) : (
+				<AuthStack />
+			)}
 		</NavigationContainer>
 	);
 };

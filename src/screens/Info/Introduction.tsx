@@ -6,18 +6,19 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { color } from "../../styles/Color";
 import { mainStyles } from "../../styles/MainStyle";
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { screenWidth } from "../../const";
+import { asyncStorage, getUser, screenWidth } from "../../const";
 import { Form } from "./Baby";
 import { UserContext } from "../../context/init";
 import { signOut } from "firebase/auth";
 import { auth, firestore } from "../../firebase/config";
 import { doc, setDoc } from "firebase/firestore";
+import PinkButton from "../../components/PinkButton";
 
 const avtSize = screenWidth * 0.2;
 
@@ -80,19 +81,39 @@ const Introduction = () => {
 	const [name, setName] = useState(userInfo.name);
 	const [age, setAge] = useState(userInfo.age);
 	const phoneNumber = userInfo.id;
-	const updateName = (name: string) => {
+
+	useEffect(() => {
+		// console.log(phoneNumber);
+		const unsub = async () => {
+			try {
+				await setUserInfo(await getUser(phoneNumber));
+			} catch (error) {
+				console.log(error);
+			}
+		};
+		// return () => unsub();
+		() => unsub();
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+	const updateName = async (name: string) => {
 		setName(name);
-		setUserInfo({ ...userInfo, ...{ name } });
+		// await setUserInfo({ ...userInfo, ...{ name } });
 	};
-	const updateAge = (age: string | number) => {
+	const saveData = async () => {
+		try {
+			await setUserInfo({ ...userInfo, name, age: Number(age) });
+		} catch (error) {
+			console.log(error);
+		}
+	};
+	const updateAge = async (age: string | number) => {
 		setAge(age as string);
-		setUserInfo({ ...userInfo, ...{ age } });
+		// await setUserInfo({ ...userInfo, ...{ age } });
 	};
 	const onSignOut = () => {
 		// navigation.navigate("Init");
 
 		signOut(auth)
-			.then(() => console.log("Dm duong"))
+			.then(() => asyncStorage.removeItem("token"))
 			.catch((error) => console.log(error));
 	};
 
@@ -128,6 +149,14 @@ const Introduction = () => {
 				setName={updateName}
 				additionalInfoInit={phoneNumber}
 				setAge={updateAge}
+				defaultGender={userInfo?.gender}
+				isUser
+			/>
+			<PinkButton
+				text="Save"
+				center={false}
+				width={"90%"}
+				onPress={saveData}
 			/>
 			<FlatList
 				data={navigationList}

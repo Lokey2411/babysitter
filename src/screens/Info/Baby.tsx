@@ -30,6 +30,8 @@ export interface FormProps extends ViewProps {
 	setAge: any;
 	additionalInfo: string;
 	additionalInfoInit: string;
+	defaultGender?: string;
+	isUser?: boolean;
 }
 
 export const Form = (props: FormProps) => {
@@ -37,19 +39,22 @@ export const Form = (props: FormProps) => {
 		<View {...props}>
 			<FormItem
 				text={props.hasLabel ? "Tên: " : ""}
-				defaultValue={props.name}
+				defaultValue={props.name as string}
 				onChangeText={(text) => props.setName(text)}
 			/>
 			<FormItem
 				text={props.hasLabel ? "Tuổi: " : ""}
-				defaultValue={props.age.toString()}
+				defaultValue={props.age as string}
 				onChangeText={(text) => props.setAge(text)}
 			/>
 			<FormItem
 				text={props.hasLabel ? `${props.additionalInfo}: ` : ""}
-				defaultValue={props.additionalInfoInit}
+				defaultValue={props.additionalInfoInit as string}
 			/>
-			<GenderField />
+			<GenderField
+				defaultGender={props.defaultGender}
+				isUser={props.isUser}
+			/>
 		</View>
 	);
 };
@@ -65,7 +70,7 @@ const Fixed = ({ route }: any) => {
 				hasLabel={true}
 				style={{ height: screenHeight * 0.7 }}
 				name={name}
-				age={age}
+				age={`${age}`}
 				additionalInfo="Ghi chú"
 				additionalInfoInit=""
 				setName={setName}

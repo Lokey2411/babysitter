@@ -5,6 +5,7 @@ import { color } from "./Color";
 export const WhiteLogo = () => {
 	return (
 		<View style={[mainStyles.container]}>
+			{/* <img src = "" source = {{uri: ""}} /> */}
 			<Image
 				source={require("../../assets/image/logo/white-logo.jpg")}
 				style={mainStyles.logo}

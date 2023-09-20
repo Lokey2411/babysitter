@@ -10,6 +10,7 @@ import PopUp from "../../components/PopUp";
 const Password = () => {
 	const navigation = useNavigation<any>();
 	const [displayPopup, setDisplayPopup] = useState("none");
+
 	useLayoutEffect(() => {
 		navigation.setOptions({
 			title: "Mật khẩu",

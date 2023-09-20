@@ -1,5 +1,4 @@
 import {
-	Alert,
 	StyleSheet,
 	Text,
 	TextInput,
@@ -8,32 +7,15 @@ import {
 	View,
 } from "react-native";
 import React, { useContext, useLayoutEffect, useState } from "react";
-import {
-	ParamListBase,
-	useNavigation,
-	useRoute,
-} from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import BackButton from "../../components/BackButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Camera } from "iconsax-react-native";
-import { signInWithCredential } from "firebase/auth";
-import { auth, firestore } from "../../firebase/config";
 import { color } from "../../styles/Color";
 import { mainStyles } from "../../styles/MainStyle";
 import DropDownPicker from "react-native-dropdown-picker";
 import { Entypo } from "@expo/vector-icons";
 import PinkButton from "../../components/PinkButton";
-import {
-	addDoc,
-	collection,
-	doc,
-	getDoc,
-	getDocs,
-	query,
-	setDoc,
-	where,
-} from "firebase/firestore";
-import { dataCollection } from "../../const";
 import { UserContext } from "../../context/init";
 
 interface RegisterFormProps extends TextInputProps {
@@ -133,28 +115,27 @@ const RegisterInfo = () => {
 	// 	collection(firestore, "data")
 	// 	// where("id", "==", phoneNumber)
 	// );
-	const dataRef = doc(firestore, "data", phoneNumber);
+	// const dataRef = doc(firestore, "data", phoneNumber);
 	// const data = getDocs(q);
 	// console.log(data);
 	//  dataCollection.id;
 
 	const verifyInfo = () => {
+		console.log("Verifying...");
+
 		if (!name || !age || !value1 || !value2) {
 			setMessageShow(true);
 			return;
 		}
+		// console.log("Verify success");
+
 		const data = {
 			id: phoneNumber,
 			name,
 			age,
 			address_city: value1 + ", " + value2,
 		};
-
-		// console.log(data);
-
 		setMessageShow(false);
-
-		// setDoc(dataRef, data);
 		setUserInfo(data);
 	};
 	const formitems: Array<RegisterFormProps> = [

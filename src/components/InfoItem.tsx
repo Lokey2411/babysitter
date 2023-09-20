@@ -6,7 +6,7 @@ import {
 	TouchableOpacityProps,
 	View,
 } from "react-native";
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import { color } from "../styles/Color";
 import { Entypo } from "@expo/vector-icons";
 import { mainStyles } from "../styles/MainStyle";

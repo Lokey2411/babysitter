@@ -1,8 +1,10 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { collection, doc } from "firebase/firestore";
+import { collection, doc, getDoc } from "firebase/firestore";
 import { Dimensions, TouchableOpacity } from "react-native";
-import { firestore } from "./firebase/config";
+import { auth, firestore } from "./firebase/config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { signOut } from "firebase/auth";
 
 export const screenWidth = Dimensions.get("window").width;
 export const mockupData = [
@@ -94,6 +96,7 @@ export const details = mockupData.map((item, index) => {
 		worked: "VNPT xin han hanh tai tro chuong trinh nay",
 		isBooked: index === itemIsBooked,
 		phoneNumber: "0345622467",
+		id: `user${index}`,
 	};
 });
 
@@ -149,10 +152,10 @@ let babe = new Array(10).fill({
 	endDate: endDate,
 });
 
-babe = babe.map((item) => {
+babe = babe.map((item, index) => {
 	return {
 		...item,
-		babyId: Math.random(),
+		babyId: `baby${index}`,
 	};
 });
 
@@ -171,7 +174,14 @@ export const dateConvert = (day: Date) => {
 	const date = day.getDate();
 	const month = day.getMonth();
 	const year = day.getFullYear();
-	return `${date}/${month}/${year}`;
+	const validate = (time: number) => {
+		let result = `${time}`;
+		if (time < 10) {
+			result = `0${time}`;
+		}
+		return `${result}`;
+	};
+	return `${validate(date)}/${validate(month)}/${year}`;
 };
 
 export const timeConvert = (date: Date) => {
@@ -196,3 +206,33 @@ export const dataCollection = collection(firestore, "data");
 export function capitalize(s: string) {
 	return s[0].toUpperCase() + s.slice(1);
 }
+
+export const getUserLoggedIn = (phoneNumber: string): any => {
+	const userLoggedIn = doc(firestore, "data", phoneNumber);
+	var item;
+	getDoc(userLoggedIn).then((snapshot) => (item = snapshot.data()));
+	console.log(item);
+	return item;
+};
+
+export const asyncStorage = AsyncStorage;
+
+export const onSignOut = () => {
+	AsyncStorage.removeItem("token");
+	signOut(auth)
+		.then(() => console.log("user sign out"))
+		.catch((error) => console.log(error));
+};
+
+export const getUser = async (id: any) =>
+	(await getDoc(doc(firestore, "data", id))).data();
+export const getAsyncStorage = async (key: any) => {
+	return await AsyncStorage.getItem(key);
+};
+export const setAsyncStorage = async (key: string, value: any) => {
+	await AsyncStorage.setItem(key, value);
+};
+export const userInfoIsSetted = (id: string) => {
+	const user = getUser(id);
+	return !!user;
+};

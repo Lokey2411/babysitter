@@ -1,6 +1,7 @@
 import { Text, TextInput, TextInputProps, View } from "react-native";
 import { color } from "../styles/Color";
 import { mainStyles } from "../styles/MainStyle";
+import { useState } from "react";
 
 export interface FormItemProps extends TextInputProps {
 	text: string;

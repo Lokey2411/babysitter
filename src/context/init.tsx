@@ -1,6 +1,7 @@
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import React, { createContext, useState } from "react";
 import { firestore } from "../firebase/config";
+import { asyncStorage, getUser, setAsyncStorage } from "../const";
 
 export interface UserContextTypes {
 	user: any;
@@ -15,9 +16,15 @@ export interface UserContextTypes {
 		age?: string | null;
 		address?: any;
 		id?: any;
+		gender?: string;
+		favIds?: string[];
 	};
 	setUserInfo: Function;
 	userInfoIsSetted: boolean;
+	phoneNumber: any;
+	setPhoneNumber: Function;
+	userGender: string;
+	setUserGender: Function;
 }
 
 export const UserContext = createContext<UserContextTypes>({
@@ -31,6 +38,10 @@ export const UserContext = createContext<UserContextTypes>({
 	userInfo: {},
 	userInfoIsSetted: false,
 	setUserInfo: () => {},
+	phoneNumber: "",
+	setPhoneNumber: () => {},
+	userGender: "",
+	setUserGender: () => {},
 });
 
 export const InitUserContextProvider = (props: any) => {
@@ -46,29 +57,40 @@ export const InitUserContextProvider = (props: any) => {
 	});
 	const [favouriteMealsID, setFavouriteMealsID] = useState<any>([]);
 	const [isMommy, setIsMommy] = useState(false);
-	const [userInfoIsSetted, setUserInfoIsSetted] = useState(false);
-	const addFavourite = (id: any) => {
-		setFavouriteMealsID([...favouriteMealsID, id]);
+	const [userInfoIsSetted, setUserInfoIsSetted] = useState(
+		!!asyncStorage.getItem("token")
+	);
+	const addFavourite = async (id: any) => {
+		const newFavData = [...favouriteMealsID, id];
+		setFavouriteMealsID(newFavData);
+		await onUserInfoChange({
+			...userInfo,
+			favouriteMealsID: newFavData,
+		});
 	};
-	const removeFavourite = (id: any) => {
-		setFavouriteMealsID((currentFavIDs: any) =>
-			currentFavIDs.filter((item: any) => item !== id)
-		);
+	const removeFavourite = async (id: any) => {
+		const newFavData = favouriteMealsID.filter((item: any) => item !== id);
+		setFavouriteMealsID(newFavData);
+		await onUserInfoChange(newFavData);
 	};
-	const onUserInfoChange = (user: any) => {
-		// console.log(userInfo.id);
-
-		// console.log("Hello");
-		setUserInfo(user);
-		const userLoggedIn = doc(firestore, "data", userInfo.id);
-		setUserInfoIsSetted(true);
-		setDoc(userLoggedIn, user);
+	const [phoneNumber, setPhoneNumber] = useState("");
+	const [userGender, setUserGender] = useState<any>("");
+	const onUserInfoChange = async (user: any) => {
+		try {
+			setUserInfo(user);
+			const userLoggedIn = doc(firestore, "data", user.id);
+			setUserInfoIsSetted(!!user);
+			await setDoc(userLoggedIn, user);
+			await setAsyncStorage("token", JSON.stringify(user));
+		} catch (error) {
+			console.log(error);
+		}
 	};
 	return (
 		<UserContext.Provider
 			value={{
 				user: user,
-				setUser: setUser,
+				setUser,
 				favIds: favouriteMealsID,
 				addFavoriteID: addFavourite,
 				removeFavoriteID: removeFavourite,
@@ -77,6 +99,10 @@ export const InitUserContextProvider = (props: any) => {
 				userInfo,
 				setUserInfo: onUserInfoChange,
 				userInfoIsSetted,
+				phoneNumber,
+				setPhoneNumber,
+				userGender,
+				setUserGender,
 			}}
 			// value={[context, setContext]}
 		>

@@ -26,6 +26,7 @@ import {
 } from "react-native-gifted-chat";
 import {
 	chatsRef,
+	dateConvert,
 	details,
 	screenHeight,
 	screenWidth,
@@ -43,15 +44,12 @@ import { AttachCircle, Camera, Send2 } from "iconsax-react-native";
 import { auth, firestore } from "../../firebase/config";
 import {
 	addDoc,
-	collection,
+	and,
 	doc,
-	getDoc,
-	getDocFromCache,
-	getDocsFromCache,
 	onSnapshot,
 	orderBy,
 	query,
-	updateDoc,
+	where,
 } from "firebase/firestore";
 import { UserContext } from "../../context/init";
 
@@ -65,17 +63,8 @@ const Chat = () => {
 
 	const navigation = useNavigation();
 	const { userInfo } = useContext(UserContext);
-	const docRef = doc(firestore, "data", userInfo.id);
-	const [userLoggedIn, setUserLoggedIn] = useState<any>(null);
-
-	const updateUserLoggedIn = async () =>
-		setUserLoggedIn((await getDoc(docRef)).data());
-	try {
-		updateUserLoggedIn();
-	} catch (error) {
-		console.log(error);
-	}
-	// console.log("user: ", userLoggedIn);
+	// const docRef = doc(firestore, "data", userInfo.id);
+	// console.log("user: ", userInfo);
 
 	useLayoutEffect(() => {
 		navigation.setOptions({
@@ -127,15 +116,21 @@ const Chat = () => {
 			},
 			title: "",
 		});
-		const q = query(chatsRef, orderBy("createAt", "desc"));
-		const unsubcribe = onSnapshot<any, any>(q, (snapshot: any) => {
+		const q = query(
+			chatsRef,
+			where("receiverID", "==", receiverID),
+			orderBy("createAt", "desc")
+		);
+		const unsubcribe = onSnapshot<any, any>(q, async (snapshot: any) => {
 			setMessages(
 				snapshot.docs.map((item: any) => {
 					return {
 						_id: item.id,
+						senderID: item.data().senderID,
 						createAt: item.data().createAt,
 						text: item.data().text,
 						user: item.data().user,
+						receiverID: item.data().receiverID,
 					};
 				})
 			);
@@ -149,13 +144,16 @@ const Chat = () => {
 				setMessages((previousMessages) =>
 					GiftedChat.append(previousMessages, messages)
 				);
+				// console.log(messages);
 				setNewMessages("");
-				const { _id, text, user } = messages[0];
+				const { _id, text, user, receiverID, senderID } = messages[0];
 				await addDoc(chatsRef, {
 					_id,
 					createAt: Date.now(),
 					text,
 					user,
+					receiverID,
+					senderID,
 				});
 				// console.log(_id);
 			} catch (error) {
@@ -166,10 +164,17 @@ const Chat = () => {
 	);
 	const renderMessage = (props: any) => {
 		const { text } = props.currentMessage;
+		// console.log(props.currentMessage);
 		// console.log();
-
-		const isSender = props.currentMessage.user._id === userLoggedIn?.id;
+		// console.log(receiver == receiverID);
+		const isSender = props.currentMessage.user._id == userInfo?.id;
+		const date =
+			dateConvert(new Date(props.currentMessage.createAt)) !==
+			dateConvert(new Date(Date.now()))
+				? dateConvert(new Date(props.currentMessage.createAt))
+				: "";
 		const time = timeConvert(new Date(props.currentMessage.createAt));
+		const sendTime = `${date} ${time} `;
 		if (isSender)
 			// sender
 			return (
@@ -191,7 +196,7 @@ const Chat = () => {
 						style={{
 							color: color.boldedGray,
 							textAlign: "right",
-						}}>{`${time}`}</Text>
+						}}>{`${sendTime}`}</Text>
 				</View>
 			);
 		// not sender
@@ -214,7 +219,7 @@ const Chat = () => {
 					style={{
 						color: color.boldedGray,
 						marginBottom: 8,
-					}}>{`${time}`}</Text>
+					}}>{`${sendTime}`}</Text>
 			</View>
 		);
 	};
@@ -235,6 +240,7 @@ const Chat = () => {
 							_id: messageIdGenerator,
 							text: text,
 							user: user,
+							receiverID,
 						});
 				}}>
 				<Send2
@@ -258,8 +264,8 @@ const Chat = () => {
 				messages={messages}
 				onSend={onSend}
 				user={{
-					_id: userLoggedIn?.id,
-					name: userLoggedIn?.name,
+					_id: userInfo?.id,
+					name: userInfo?.name as string,
 					avatar: require("../../../assets/image/avt/mc.jpg"),
 				}}
 				messagesContainerStyle={{

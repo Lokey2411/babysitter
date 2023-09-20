@@ -12,6 +12,7 @@ import { mainStyles } from "../styles/MainStyle";
 import { Entypo } from "@expo/vector-icons";
 import { color } from "../styles/Color";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Calculate from "./Calculate";
 
 export interface BabyCardProps extends TouchableOpacityProps {
 	name: string;
@@ -46,6 +47,7 @@ const BabyInfo = (props: BabyCardProps) => {
 
 	return (
 		<SafeAreaView style={{ marginBottom: 0 }}>
+			<Calculate text={"hello"} />
 			<TouchableOpacity
 				style={[
 					mainStyles.center90,

@@ -1,12 +1,25 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Checkbox from "expo-checkbox";
 import { color } from "../styles/Color";
 import { mainStyles } from "../styles/MainStyle";
+import { UserContext } from "../context/init";
 
-const GenderField = ({ defaultGender }: any) => {
-	const [gender, setGender] = useState(defaultGender);
+export interface GenderFieldProps {
+	defaultGender?: string;
+	isUser?: boolean;
+}
 
+const GenderField = ({ defaultGender }: GenderFieldProps) => {
+	const [gender, updateGender] = useState(defaultGender);
+	const { setUserInfo, userInfo } = useContext(UserContext);
+	const setGender = (gender: any) => {
+		updateGender(gender);
+		setUserInfo({
+			...userInfo,
+			gender,
+		});
+	};
 	return (
 		<View>
 			<Text style={[mainStyles.title, { marginBottom: 8 }]}>Giới tính</Text>

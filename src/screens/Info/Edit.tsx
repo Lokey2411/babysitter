@@ -7,10 +7,10 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
-import React, { useLayoutEffect } from "react";
+import React, { useContext, useLayoutEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
-import { details, screenWidth, userLogedIn } from "../../const";
+import { details, getUserLoggedIn, screenWidth } from "../../const";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { mainStyles } from "../../styles/MainStyle";
 import InputField, { InputFieldProps } from "../../components/InputField";
@@ -19,6 +19,9 @@ import { color } from "../../styles/Color";
 import GenderField from "../../components/GenderField";
 import PinkButton from "../../components/PinkButton";
 import { FormProps } from "./Baby";
+import { doc, getDoc } from "firebase/firestore";
+import { firestore } from "../../firebase/config";
+import { UserContext } from "../../context/init";
 
 export interface ThisFormProps extends InputFieldProps {
 	defaultValue: string;
@@ -44,9 +47,16 @@ const ThisFormItem = (props: ThisFormProps) => {
 
 const Edit = () => {
 	const navigation = useNavigation<any>();
-	const item = userLogedIn;
+	const { userInfo } = useContext(UserContext);
+	const docRef = doc(firestore, "data", userInfo.id);
+	const item = getUserLoggedIn(userInfo.id);
 	const avtSize = screenWidth * 0.3;
-	const formItem = [item.name, "penaldu@test.ru", item.age, item.phoneNumber];
+	const formItem = [
+		userInfo?.name,
+		"penaldu@test.ru",
+		userInfo?.age,
+		userInfo?.id,
+	];
 	useLayoutEffect(() => {
 		navigation.setOptions({
 			headerShown: true,
@@ -68,7 +78,7 @@ const Edit = () => {
 	const formFix: FormItemProps[] = [
 		{
 			text: "Kinh nghiệm",
-			defaultValue: item.worked,
+			defaultValue: item?.worked,
 		},
 		{
 			text: "Số năm kinh nghiệm",
@@ -103,7 +113,7 @@ const Edit = () => {
 				))}
 				<FormItem
 					text="Giới thiệu"
-					defaultValue={item.desc}
+					defaultValue={item?.desc}
 					style={[
 						{
 							height: 200,

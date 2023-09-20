@@ -14,22 +14,28 @@ import Checkbox from "expo-checkbox";
 import InputField from "../../components/InputField";
 import PhoneInput from "react-native-phone-input";
 import CheckBoxField from "../../components/CheckBoxField";
-import PinkButton from "../../components/PinkButton";
 import { useNavigation } from "@react-navigation/native";
 import {
 	PhoneAuthProvider,
 	RecaptchaVerifier,
+	signInWithCredential,
+	signInWithEmailAndPassword,
 	signInWithPhoneNumber,
 } from "firebase/auth";
 import { auth, firebaseConfig } from "../../firebase/config";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import { UserContext } from "../../context/init";
+import { userInfoIsSetted } from "../../const";
+import Password from "../Info/Password";
+import PinkButton from "../../components/PinkButton";
 
 const LogIn = () => {
 	const navigation = useNavigation<any>();
+	const [email, setEmail] = useState("");
 	const [phoneNumber, setPhoneNumber] = useState<string>("+84");
-	const { userIsMommy } = useContext(UserContext);
+	const { userIsMommy, setUser } = useContext(UserContext);
 	const [phone, setPhone] = useState("");
+	const [password, setPassword] = useState("");
 	const mobileValidate = (text: string) => {
 		const regexp = /^\d{9,10}$/;
 		return text.match(regexp);
@@ -38,7 +44,6 @@ const LogIn = () => {
 
 	const [verificationID, setVerificationID] = useState("");
 	const [info, setInfo] = useState("");
-
 	const handleSendVerificationCode = async () => {
 		try {
 			const phoneProvider = new PhoneAuthProvider(auth); // initialize the phone provider.
@@ -52,16 +57,20 @@ const LogIn = () => {
 		}
 	};
 	const signIn = () => {
-		const validateResult = mobileValidate(phone);
-		if (validateResult) {
-			handleSendVerificationCode();
-			navigation.navigate("OTP", {
-				phone: phone,
-				verificationID: verificationID,
-			});
-		} else {
-			Alert.alert("Số điện thoại không hợp lệ");
-		}
+		// const validateResult = mobileValidate(phone);
+		// if (validateResult) {
+		// 	handleSendVerificationCode();
+
+		// navigation.navigate("OTP", {
+		// 	phone: phone,
+		// 	verificationID: verificationID,
+		// });
+		// } else {
+		// 	Alert.alert("Số điện thoại không hợp lệ");
+		// }
+		signInWithEmailAndPassword(auth, email, password)
+			.then(() => {})
+			.catch((error) => console.log(error));
 	};
 
 	return (
@@ -78,15 +87,16 @@ const LogIn = () => {
 				<PinkLogo />
 				<InputField
 					backgroundColor={color.gray}
-					placeholder="Điện thoại"
+					placeholder="Email"
 					onChangeText={(text) => {
+						setEmail(text);
 						setPhoneNumber(text);
 						setPhone(text.replace("+84", ""));
 					}}
 					onEndEditing={() => {}}
-					value={phoneNumber}
+					value={email}
 					autoCorrect={true}
-					autoComplete="tel"
+					autoComplete="email"
 					defaultValue="+84"
 					autoFocus
 					keyboardType="number-pad"
@@ -96,6 +106,8 @@ const LogIn = () => {
 					textContentType="password"
 					secureTextEntry={true}
 					backgroundColor={color.gray}
+					value={password}
+					onChangeText={setPassword}
 				/>
 				<View style={[mainStyles.rowBetween, { width: "90%" }]}>
 					<CheckBoxField text={"Ghi nhớ đăng nhập"} />
@@ -113,15 +125,13 @@ const LogIn = () => {
 
 			<View style={[mainStyles.rowCenter, { marginTop: "30%" }]}>
 				<Text>Bạn chưa có tài khoản? </Text>
-				<TouchableOpacity
-					onPress={() => userIsMommy && navigation.navigate("SignUp")}>
+				<TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
 					<Text style={{ color: color.blue }}>Đăng ký</Text>
 				</TouchableOpacity>
 			</View>
 			<FirebaseRecaptchaVerifierModal
 				firebaseConfig={firebaseConfig}
 				ref={recaptchaVerifier}
-				attemptInvisibleVerification={false}
 			/>
 		</View>
 	);

@@ -14,6 +14,7 @@ import LookUpDetails from "../LookUp/LookUpDetails";
 import { mainStyles } from "../../styles/MainStyle";
 import { FontAwesome } from "@expo/vector-icons";
 import BackButton from "../../components/BackButton";
+import { color } from "../../styles/Color";
 
 const Mother = () => {
 	const navigation = useNavigation<any>();
@@ -23,10 +24,14 @@ const Mother = () => {
 			headerTitleStyle: { fontWeight: "700" },
 			headerShown: true,
 			headerLeft: BackButton,
+			headerShadowVisible: false,
 		});
 	}, [navigation]);
 	return (
-		<View>
+		<View
+			style={{
+				backgroundColor: color.white,
+			}}>
 			<LookUpDetails data={details} />
 		</View>
 	);

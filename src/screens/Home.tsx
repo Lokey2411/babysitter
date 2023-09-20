@@ -13,7 +13,6 @@ import { StatusBar } from "expo-status-bar";
 import PinkButton from "../components/PinkButton";
 import { useNavigation } from "@react-navigation/native";
 import { UserContext } from "../context/init";
-import { userLogedIn, userId } from "../const";
 
 const Home = () => {
 	const userContext = useContext(UserContext);
