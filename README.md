@@ -4,6 +4,8 @@
 - Expo Go Trên Điện thoại
 - Expo CLI trên terminal
 - git bash ( https://git-scm.com/downloads)
+- yarn (https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)
+- nodejs ( https://nodejs.org/en/download)
 ### Cài đặt
 #### Lấy code dự án
   Chạy lệnh : `git clone https://github.com/Lokey2411/babysitter.git` để lấy về code của dự án
